@@ -1,6 +1,8 @@
 import datetime
 
 from flask import Flask, render_template
+
+from config import conifg
 from route.routing import param
 
 # app = Flask(__name__)
@@ -23,6 +25,8 @@ app.register_blueprint(param)
 # JSON_AS_ASCII 初期值為 True, 中日文會亂碼
 app.config['JSON_AS_ASCII'] = False
 
+# 配置 config class
+app.config.from_object(conifg.BaseConfig())
 
 @app.after_request
 def after_request(res):
