@@ -4,6 +4,8 @@ from flask import Flask, render_template
 
 from config import conifg
 from route.routing import param
+from flask_cors import CORS
+
 
 # app = Flask(__name__)
 
@@ -20,6 +22,7 @@ from route.routing import param
 
 
 app = Flask(__name__)
+CORS(app)
 app.register_blueprint(param)
 
 # JSON_AS_ASCII 初期值為 True, 中日文會亂碼
