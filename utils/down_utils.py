@@ -62,8 +62,6 @@ def download_blog_imgs(src_list: list, dcimg_list: list, path: str, name: str, d
         # 下載到本地
         open(file_path, 'wb').write(response.content)
 
-        photo: bytes = response.content
-
         # modify file date
         modify_file_time(file_path, date)
 
