@@ -41,8 +41,9 @@ def download_blog_photo(url) -> blog_photo_zip:
         memory_zip = down_utils.get_exists_blog_photo(blog_path)
     else:
         # 不存在 下載
-        down_utils.download_img(path=blog_path, soup=soup)
-        memory_zip = down_utils.get_exists_blog_photo(blog_path)
+        photos = down_utils.download_img(path=blog_path, soup=soup)
+        memory_zip = down_utils.bytes_list_to_bio(photos)
+        # memory_zip = down_utils.get_exists_blog_photo(blog_path)
 
     zip_rs = blog_photo_zip()
     zip_rs.zip_file = memory_zip

@@ -1,12 +1,14 @@
+import io
 import os
 import zipfile
 from io import BytesIO
+from mmap import mmap
 
 import requests
 from bs4 import BeautifulSoup
 
 from utils import utils, bs4_utils, file_utils
-from utils.file_utils import modify_file_time
+from utils.file_utils import modify_file_time, modify_file_time_by_byte
 
 
 def download_img(path: str, soup: BeautifulSoup, cur_url=''):
@@ -35,8 +37,7 @@ def download_img(path: str, soup: BeautifulSoup, cur_url=''):
     date = dates[0].get_text()
 
     # get date
-    download_blog_imgs(src_list, dcimg_list, path, name, date)
-    pass
+    return download_blog_imgs(src_list, dcimg_list, path, name, date)
 
 
 def download_blog_imgs(src_list: list, dcimg_list: list, path: str, name: str, date: str):
@@ -49,6 +50,8 @@ def download_blog_imgs(src_list: list, dcimg_list: list, path: str, name: str, d
 
     i = 1
 
+    photos: list = []
+
     for src in src_list:
         # add domain
         url = utils.add_domain(src)
@@ -59,13 +62,18 @@ def download_blog_imgs(src_list: list, dcimg_list: list, path: str, name: str, d
         response = requests.get(url=url)
         # response.status_code = 404
 
-        # 下載到本地
-        open(file_path, 'wb').write(response.content)
-
         photo: bytes = response.content
 
+        # 下載到本地
+        # open(file_path, 'wb').write(response.content)
+
+        # photo_byte_file = io.BytesIO(photo)
+
+        modify_file_time_by_byte(photo, date)
+        photos.append(photo)
         # modify file date
-        modify_file_time(file_path, date)
+        # modify_file_time(file_path, date)
+
 
         i = i + 1
 
@@ -83,7 +91,7 @@ def download_blog_imgs(src_list: list, dcimg_list: list, path: str, name: str, d
         except:
             print('過期: ', dcimg)
 
-    return None
+    return photos
 
 
 # 下載已存在的 blog 圖片
@@ -94,6 +102,21 @@ def get_exists_blog_photo(blog_path) -> BytesIO:
         for file_name in files:
             file_path = blog_path + '/' + file_name
             zf.write(file_path, compress_type=zipfile.ZIP_DEFLATED, arcname=file_name)  # 壓縮種類
+        zf.close()
+    memory_file.seek(0)  # 改變當前讀寫位置。如果將參數設為 0，則會將讀寫位置移動到流的開頭
+
+    return memory_file
+
+
+def bytes_list_to_bio(byte_list: list):
+    memory_file = BytesIO()
+
+    with zipfile.ZipFile(memory_file, 'w') as zf:
+        # files = [f for f in os.listdir(blog_path)]
+        i = 1
+        for byte in byte_list:
+            zf.writestr(str(i) + '.jpg', byte, compress_type=zipfile.ZIP_DEFLATED)
+            # zf.write(byte, compress_type=zipfile.ZIP_DEFLATED, arcname=file_name)  # 壓縮種類
         zf.close()
     memory_file.seek(0)  # 改變當前讀寫位置。如果將參數設為 0，則會將讀寫位置移動到流的開頭
 
