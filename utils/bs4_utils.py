@@ -20,16 +20,26 @@ def get_soup(cur_url) -> BeautifulSoup:
 
 
 def get_src(html):
-    return html['src']
+    try:
+        src_ = html['src']
+        return src_
+    except:
+        pass
 
 
 def get_href(html):
-    return html['href']
+    try:
+        href_ = html['href']
+        return href_
+    except:
+        pass
 
 
 # 過濾非圖片連結(gif)
 def filter_jpg(src):
     gif_reg = re.compile(r".*\.gif")
+    if src is None:
+        return False
     if gif_reg.match(src):
         return False
 
